@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="jquery.min.js"></script>
+    <script src="FileSaver.js"></script>
+    <script src="xlsx.mini.flow.js"></script>
+    <title>Document</title>
+</head>
+<body>
+    <div id="navbar"><span>Red Stapler = sheetJS</span></div>
+    
+        <input type="file" id="input-excel"/>
+    </div>
+   <script>
+
+    </script>
+    <script>
+
+        var test 
+        var texto = ''
+        var valores = {}
+        function processamento(){
+            for(let prop in test){
+                valores[prop] = test[prop]
+                if(test[prop] =="	"){
+                    valores[prop] = ';'
+                }
+            }
+            for(let prop in valores){
+                texto += valores[prop]
+            }
+        }
+        $('#input-excel').change(function(e){
+                var reader = new FileReader();
+                reader.readAsArrayBuffer(e.target.files[0]);
+             
+                reader.onload = function(e) {
+                        var data = new Uint8Array(reader.result);
+                        var wb = XLSX.read(data,{type:'array'});
+                        var htmlstr = XLSX.write(wb,{sheet:"sheet no1", type:'binary',bookType:'html'});
+                        
+                        test = XLSX.write(wb,{sheet:"sheet no1", type:'binary',bookType:'txt'});    
+                        processamento();
+                 }
+               
+        });
+</script>
+
+</body>
+</html>

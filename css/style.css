@@ -1,0 +1,294 @@
+*,
+::after,
+::before {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+@font-face {
+    font-family: MazzardHBold;
+    src: url(fonts/MazzardH-Bold.otf);
+
+}
+
+@font-face {
+    font-family: MazzardHSemi;
+    src: url(fonts/MazzardH-SemiBold.otf);
+
+}
+
+@font-face {
+    font-family: MazzardHRegular;
+    src: url(fonts/MazzardH-Regular.otf);
+
+}
+
+.nomeVariedade {
+    font-size: 17px;
+    margin-top: 5%;
+}
+
+input[type='file'] {
+    display: none;
+}
+
+label {
+    color: #56abf7;
+    cursor: pointer;
+    text-decoration: underline;
+}
+
+label:hover {
+    color: #3189d6;
+    transition-duration: 0.4s;
+}
+
+nav {
+    height: 75px;
+}
+
+#nav-bar {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+#idTabela {
+    width: 50.5%;
+    margin: auto;
+    text-align: center;
+    font-family: MazzardHRegular;
+    margin-top: 2%;
+    border: none;
+    color: white;
+    background-color: #70b5f1;
+    box-sizing: border-box;
+}
+
+.table {
+    display: table;
+    width: 100%;
+    max-width: 100%;
+}
+
+.table-responsive {
+    display: block;
+    width: 100%;
+    overflow-x: auto;
+}
+
+
+#tabela {
+    text-align: center;
+    font-family: MazzardHSemi;
+    font-size: 20px;
+    margin-top: 3%;
+}
+
+#gr {
+    text-align: center;
+    font-family: MazzardHSemi;
+    font-size: 20px;
+    margin-top: 10%;
+}
+
+th {
+    color: white;
+    background-color: #3d8ad4;
+}
+
+.chart-container {
+    width: 700px;
+    height: 500px;
+    margin: auto;
+    margin-top: 5%;
+}
+
+.navbar {
+    background-image: linear-gradient(to bottom, #56abf7, #56aafa);
+    padding: 0 !important;
+}
+
+.navbar-brand {
+    margin-left: 11.6%;
+}
+
+.navbar-brand img {
+    height: 40px;
+}
+
+nav .estDescritiva {
+    font-size: 25px;
+    color: white;
+    font-weight: 600;
+    margin-left: 21%;
+    margin-top: 0.9%;
+    font-family: MazzardHSemi;
+}
+
+nav .usuario .text {
+    color: white;
+    font-size: 20px;
+    font-family: MazzardHSemi;
+}
+
+nav .usuario {
+    margin-top: 0.9%;
+    margin-left: 22%;
+    cursor: pointer;
+}
+
+div .textoDados {
+    font-size: 17px;
+    font-family: MazzardHSemi;
+}
+
+div textarea {
+    width: 100%;
+    height: 80px;
+    border-radius: 10px;
+    border: 2px solid #D8D8D8;
+    padding-left: 15px;
+    padding-top: 5px;
+    padding-right: 15px;
+    padding-bottom: 5px;
+    outline: none;
+}
+
+#divDados {
+    margin-top: 1%;
+    font-family: MazzardHSemi;
+}
+
+select {
+    color: #757575;
+    outline: none;
+    width: 100%;
+    border-radius: 10px;
+    border: 2px solid #D8D8D8;
+    padding-left: 15px;
+    padding-top: 5px;
+    padding-bottom: 5px;
+    outline: none;
+}
+
+div .textoTipoP {
+    font-size: 17px;
+    margin-top: 5%;
+
+}
+
+input {
+    color: #757575;
+    outline: none;
+    width: 100%;
+    border-radius: 10px;
+    border: 2px solid #D8D8D8;
+    padding-left: 15px;
+    padding-top: 5px;
+    padding-bottom: 5px;
+    outline: none;
+}
+
+div .nomeVariavel {
+    font-size: 17px;
+    margin-top: 5%;
+}
+
+div .textoTipoV {
+    font-size: 17px;
+    margin-top: 5%;
+}
+
+div #calcular {
+    margin-top: 5%;
+    border-radius: 30px;
+    margin-left: 33%;
+    font-weight: 700;
+}
+
+button {
+    background: #3c9df2;
+    width: 35%;
+    height: 50px;
+    text-transform: uppercase;
+    font-size: 14px;
+    color: #fff;
+    line-height: 16px;
+    letter-spacing: 0.5px;
+    border-radius: 30px;
+    border: none;
+    outline: none;
+    cursor: pointer;
+}
+
+button:hover {
+    transition-duration: 0.4s;
+    background-color: #1c8cee;
+}
+
+.textoprovi {
+    color: transparent;
+}
+
+
+@media only screen and (max-width: 1000px) {
+
+    .table-custom th,
+    .table-custom td {
+        padding: .3em !important;
+    }
+
+    #tabela {
+        margin-top: 7%;
+    }
+
+    .chart-container {
+        width: 350px;
+        height: 350px;
+        margin: auto;
+        margin-top: 5%;
+    }
+
+    #divDados {
+        margin-top: 10%;
+        margin-left: 0;
+        font-family: MazzardHSemi;
+    }
+
+    .navbar-brand {
+        margin-left: 5%;
+        margin-top: 0;
+    }
+
+    .textoprovi {
+        color: #3c9df2;
+        font-family: MazzardHBold;
+        font-size: 20px;
+        font-weight: 600;
+        text-align: center;
+        margin-top: 10%;
+    }
+
+    nav .estDescritiva {
+        font-size: 20px;
+        color: transparent;
+        font-weight: 600;
+        position: absolute;
+        margin-left: 115px;
+        margin-top: 17%;
+        font-family: MazzardHBold;
+    }
+
+    nav .usuario .text {
+        font-size: 18px;
+    }
+
+    nav .usuario {
+        margin-top: 3.4%;
+        margin-right: 5%;
+        margin-left: 22%;
+        cursor: pointer;
+    }
+}

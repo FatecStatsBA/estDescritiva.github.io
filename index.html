@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css?family=Lato&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Roboto&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.3/Chart.bundle.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="css/style.css">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css">
+    <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"></script>
+    <script src="jquery.min.js"></script>
+    <script src="FileSaver.js"></script>
+    <script src="xlsx.mini.flow.js"></script>
+
+    <title>Estátistica descritiva</title>
+</head>
+
+<body>
+    <section id="nav-bar">
+        <nav class="navbar navbar-expand-lg navbar-light">
+            <a class="navbar-brand" href="../index.html"><img src="img/logo.png"></a>
+            <h1 class="estDescritiva">Estátistica descritiva</h1>
+            <div class="usuario">
+                <h1 class="text">Malu</h1>
+            </div>
+        </nav>
+
+    </section>
+    <h1 class="textoprovi">
+        Estátistica descritiva
+    </h1>
+    <div id="home">
+        <section id="dados">
+            <div class="container">
+                <div class="row">
+                    <div class="col-md-3"></div>
+                    <div id="divDados" class="col-md-6">
+                        <h2 class="textoDados" id='Dados'>Entre com os dados ou faça upload dos arquivos clicando <label
+                                for="input-excel">aqui.</label>
+                            <input href="#" type="file" id="input-excel" placeholder="aqui.">
+                        </h2>
+                        <textarea type="text" id="txtDado"
+                            placeholder="Separe os dados com ponto e virgula, por favor."></textarea>
+
+                        <h2 class="textoTipoP" id='txtTipoP'>Escolha o tipo da pesquisa.</h2>
+                        <select class='tipoPesquisa' name="tipoPesquisa">
+                            <option value="populacao" name='pa'>População</option>
+                            <option value="amostra" name='pa'>Amostra</option>
+                        </select>
+
+                        <h2 class="nomeVariedade" id='Variedade'>Qual vai ser o nome da sua váriavel?</h2>
+                        <input type="text" id="txtVariedade" placeholder="Escolha o nome que desejar."
+                            style="color: black;">
+
+                        <h2 class="textoTipoV">Escolha o tipo da váriavel.</h2>
+                        <select class="tipoVariavel">
+                            <option value="QN" name='TipoT'>Qualitativa nominal</option>
+                            <option value="QO" name='TipoT'>Qualitativa ordinal</option>
+                            <option value="QD" name='TipoT'>Quantitativa discreta</option>
+                            <option value="QC" name='TipoT'>Quantitativa contínua</option>
+                        </select>
+
+                        <button onclick="calcular('idTabela')" id="calcular">Calcular</button>
+                    </div>
+                    <div class="col-md-3"></div>
+                </div>
+            </div>
+        </section>
+    </div>
+    <div id="graftab">
+        <h2 id="tabela" style="display: none;">Tabela dos dados</h2>
+        <div class="table-responsive">
+            <table class="table table-striped table table-borderless table-custom" id="idTabela" border="1"
+                style="display: none;">
+                <tr>
+                    <th id="TipoP">Tipo dos Dados</th>
+                    <th>Frequência</th>
+                    <th>Frequência%</th>
+                    <th>Fac</th>
+                    <th>Fac%</th>
+                </tr>
+            </table>
+        </div>
+        <div class="chart-container">
+            <h2 id="gr" style="display: none;">Gráfico dos dados</h2>
+            <canvas id="grafico"></canvas>
+        </div>
+    </div>
+    <script>
+        $('button').on('click', function () {
+            $('div#home').hide();
+            $('table#idTabela').show();
+            $('h2#tabela').show();
+            $('h2#gr').show();
+            $('div#graftab').show();
+        });
+        var hs = []
+        var i = 0
+        var acum = 0 //Gera as porcantagens
+        var numDigitados = [] //Organiza aordem
+        var ic = 0 //Intervalo de Classe
+        var amplitude = 0
+        var min = 1000000000000
+        var max = 0
+        var obj = {}
+        let obj2 = {}
+        var k = 0
+        var vet = []
+        var ict = 0
+        var pa = document.getElementsByName('pa')
+        var TipoT = document.getElementsByName('TipoT')
+        let VetColor = []
+        var vetQ = []
+        var str
+        var comp = []
+        var left
+        var cG = 0
+        var confirm = true
+        var test //pra comparação
+        var texto = '' //para receber o ;
+
+        function processamento() {
+            var valores = {} // auxliar
+            for (let prop in test) {
+                valores[prop] = test[prop]
+                if (test[prop] == "	") {
+                    valores[prop] = ';'
+                }
+            }
+            for (let prop in valores) {
+                texto += valores[prop]
+            }
+            calcular()
+        }
+        $('#input-excel').change(function (e) {
+            confirm = false
+            var reader = new FileReader();
+            reader.readAsArrayBuffer(e.target.files[0]);
+
+            reader.onload = function (e) {
+                var data = new Uint8Array(reader.result);
+                var wb = XLSX.read(data, {
+                    type: 'array'
+                });
+                var htmlstr = XLSX.write(wb, {
+                    sheet: "sheet no1",
+                    type: 'binary',
+                    bookType: 'html'
+                });
+
+                test = XLSX.write(wb, {
+                    sheet: "sheet no1",
+                    type: 'binary',
+                    bookType: 'txt'
+                });
+                processamento();
+            }
+
+        });
+
+        function calcular(idTabela) {
+            console.log('foi')
+            if (confirm == false) {
+                console.log('124412s')
+                str = texto
+            } else {
+                str = document.getElementById('txtDado').value
+            }
+            console.log(str)
+            comp = str.split(";")
+            //Upload
+            while (cG < comp
+                .length
+            ) { //insere dados na tabela separados por ';' pelo número de vezes igual a quantidade de elementos do vetor
+                if (TipoT[0].selected == true || TipoT[1].selected ==
+                    true) { //processamento caso a primeira ou a segunda opção seja selecionada
+                    left = comp[cG] //Responsável por pegar os valores do vetor
+                    var leftC = String(left) //Converção para texto
+                    if (obj[leftC]) {
+                        obj[leftC]++ //Caso o elemento ja tenha sido recebido a propriedade do obejeto recebe +1
+                    } else {
+                        obj[leftC] = 1 //Caso o elemento não tenha sido adicionado a ele  
+                    }
+                    acum++
+                }
+                if (TipoT[2].selected == true) { // processamento caso a terceira opção seja selecionada
+
+                    var left = comp[cG] //Responsável por pegar os valores do vetor
+                    var leftC = Number(left) //Converte para número
+                    var teste = isNaN(leftC) //Caso o usuário digite um elemento que não seja um número
+                    if (teste == true) {
+                        if (teste == true) {
+                            alert('Insira os dados novamente!')
+                            document.getElementById('txtDado').value = ''
+                            obj = {}
+                            break;
+                        }
+                    } else {
+                        if (obj[leftC]) {
+                            obj[leftC]++ //Caso o elemento ja tenha sido recebido a propriedade do obejeto recebe +1
+                        } else {
+                            obj[leftC] = 1 //Caso o elemento não tenha sido adicionado a ele 
+                        }
+                    }
+                    acum++
+                }
+                if (TipoT[3].selected == true) { //processamento caso a terceira seja selecionada
+
+                    var left = comp[cG] //Responsável por pegar os valores do vetor
+                    var leftC = Number(left) //Converte para número
+                    var teste = isNaN(leftC) //Caso o usuário digite um elemento que não seja um número
+                    if (teste == true) {
+                        if (teste == true) {
+                            alert('Insira os dados novamente!')
+                            document.getElementById('txtDado').value = ''
+                            obj = {}
+                            break;
+                        }
+                    } else {
+                        acum++
+                        if (obj2[leftC]) {
+                            obj2[leftC]++ //Caso o elemento ja tenha sido recebido a propriedade do obejeto recebe +1
+                        } else {
+                            obj2[leftC] = 1 //Caso o elemento não tenha sido adicionado a ele 
+                        }
+
+
+                        if (leftC > max) { //Verifica se é o maior número
+                            max = leftC
+                        }
+                        if (leftC < min) { //Verifica se é o menor número
+                            min = leftC
+                        }
+                        amplitude = max - min //Calculo da amplitude
+                        k = Math.sqrt(acum) //arredonda o valor
+                        k = Math.trunc(k) //remove as casas decimais
+                        if (amplitude % k != 0) { //verifica se o número divide por 'k' e retorna um número inteiro
+                            amplitude++ //caso a divisão não retorne um número inteiro 
+                            if (amplitude % k != 0) { //Verifica se o resultado da divisão é um valor inteiro
+                                amplitude = amplitude - 2 // caso não seja um inteiro, o valor perde dois números
+                            }
+                            max
+                        }
+                        ic = amplitude / k //valor do intervalo de classe
+                        vet[acum] = leftC //Vetor para gerar gráfico
+
+                    };
+                };
+                cG++
+            };
+            //FimUpload
+
+            var Variedade = document.getElementById('txtVariedade')
+            if (TipoT[3].selected == true) { //Processamento para gerar a tabéla caso a tabela Quantitativa Contínua
+                for (let passo = min; passo <= max; passo) {
+                    //         console.log('começou // ', passo,"  // ", max)
+                    for (let j = (min - 10); j <= (passo + ic); j++) {
+                        //      console.log(j)
+                        for (let prop in obj2) {
+                            if (j >= passo && j <= (passo + ic)) {
+                                if (j == prop && passo + ic < max + ic) {
+                                    (obj[`${passo}--${passo + ic}`]) ? obj[`${passo}--${passo + ic}`] += obj2[prop]:
+                                        obj[`${passo}--${passo + ic}`] = 1;
+                                    // console.log('AQUI// ',passo+ic ,"passo+IC // ",passo  )
+                                };
+                            };
+                        };
+                    };
+                    passo += ic
+                };
+
+            };
+            let i = 0
+            if (TipoT[0].selected == true || TipoT[1].selected == true || TipoT[2].selected == true || TipoT[3]
+                .selected == true) { //Organização dos dados em ordem crecente ou alfabética
+                for (let prop in obj) {
+                    numDigitados[i] = prop //vetor recebe as propriedades
+                    i++
+                };
+                numDigitados.sort() //organização do vetor
+
+            };
+            i = 0
+            let colunas = 0
+            let frac = 0
+            for (let i in obj) {
+                frac += obj[i]
+            };
+            for (let prop in obj) { //Responsável por gerar as tabelas
+                // TipoP    txtVariedade
+                let x = document.getElementById('txtVariedade').value;
+                var ti = document.getElementById('txtVariedade').value;
+                document.getElementById('TipoP').innerHTML = x;
+                var tabela = document.getElementById(idTabela);
+                var numeroLinhas = tabela.rows.length;
+                var linha = tabela.insertRow(numeroLinhas);
+                var celula1 = linha.insertCell(0);
+                var celula2 = linha.insertCell(1);
+                var celula3 = linha.insertCell(2);
+                var celula4 = linha.insertCell(3);
+                var celula5 = linha.insertCell(4);
+
+                if (TipoT[0].selected == true || TipoT[1].selected == true) {
+                    celula1.innerHTML = numDigitados[i] //Nome do dado
+                    celula2.innerHTML = obj[numDigitados[i]] //Frequencia
+                    celula3.innerHTML = `${((obj[numDigitados[i]] / acum) * 100).toFixed(2)}%` //Frequencia%
+                    // Processamento para 4 e quinta coluna
+                    colunas += obj[numDigitados[i]]
+                    celula4.innerHTML = colunas //frac
+                    celula5.innerHTML = ((colunas / frac) * 100).toFixed(0) + '%' //frac%
+                    vetQ[i] = obj[numDigitados[i]]
+                } else {
+                    celula1.innerHTML = prop //Nome do dado
+                    celula2.innerHTML = obj[prop] //Frequencia
+                    celula3.innerHTML = `${((obj[prop] / acum) * 100).toFixed(2)}%` //Frequencia%
+                    //Processamento para 4 e quinta coluna
+                    colunas += obj[prop]
+                    celula4.innerHTML = colunas //frac
+                    celula5.innerHTML = ((colunas / frac) * 100).toFixed(0) + '%' //frac%
+                    vetQ[i] = obj[numDigitados[i]]
+                };
+                i++
+            };
+            //
+            if (TipoT[0].selected == true || TipoT[1].selected == true) {
+                var ctx = document.getElementById("grafico")
+                var chartGraph = new Chart(ctx, {
+                    type: 'pie',
+                    data: {
+                        labels: numDigitados,
+                        datasets: [{
+                            label: "Frequencia",
+                            data: vetQ,
+                            border: 6,
+                            backgroundColor: [
+
+                                fillcolor = getRandomColor(), fillcolor = getRandomColor(),
+                                fillcolor = getRandomColor(), fillcolor = getRandomColor(),
+                                fillcolor = getRandomColor(), fillcolor = getRandomColor(),
+                                fillcolor = getRandomColor(), fillcolor = getRandomColor(),
+                                fillcolor = getRandomColor(), fillcolor = getRandomColor(),
+                                fillcolor = getRandomColor(), fillcolor = getRandomColor(),
+                                fillcolor = getRandomColor(), fillcolor = getRandomColor(),
+                                fillcolor = getRandomColor(), fillcolor = getRandomColor(),
+                                fillcolor = getRandomColor(), fillcolor = getRandomColor(),
+                                fillcolor = getRandomColor(), fillcolor = getRandomColor(),
+                                fillcolor = getRandomColor(), fillcolor = getRandomColor(),
+                                fillcolor = getRandomColor(), fillcolor = getRandomColor(),
+                                fillcolor = getRandomColor(), fillcolor = getRandomColor(),
+                                fillcolor = getRandomColor(), fillcolor = getRandomColor(),
+                                fillcolor = getRandomColor(), fillcolor = getRandomColor(),
+                                fillcolor = getRandomColor(), fillcolor = getRandomColor(),
+                                fillcolor = getRandomColor(), fillcolor = getRandomColor(),
+                                fillcolor = getRandomColor(), fillcolor = getRandomColor(),
+                                fillcolor = getRandomColor(), fillcolor = getRandomColor(),
+                                fillcolor = getRandomColor(), fillcolor = getRandomColor(),
+                                fillcolor = getRandomColor(), fillcolor = getRandomColor(),
+                                fillcolor = getRandomColor(), fillcolor = getRandomColor(),
+                                fillcolor = getRandomColor(), fillcolor = getRandomColor(),
+                                fillcolor = getRandomColor(), fillcolor = getRandomColor(),
+                                fillcolor = getRandomColor(), fillcolor = getRandomColor(),
+                                fillcolor = getRandomColor(), fillcolor = getRandomColor(),
+                                fillcolor = getRandomColor(), fillcolor = getRandomColor(),
+                                fillcolor = getRandomColor(), fillcolor = getRandomColor(),
+                                fillcolor = getRandomColor(), fillcolor = getRandomColor(),
+                                fillcolor = getRandomColor(), fillcolor = getRandomColor(),
+                                fillcolor = getRandomColor(), fillcolor = getRandomColor(),
+                                fillcolor = getRandomColor(), fillcolor = getRandomColor(),
+                                fillcolor = getRandomColor(), fillcolor = getRandomColor(),
+                                fillcolor = getRandomColor(), fillcolor = getRandomColor(),
+                                fillcolor = getRandomColor(), fillcolor = getRandomColor(),
+                                fillcolor = getRandomColor(), fillcolor = getRandomColor(),
+                                fillcolor = getRandomColor(), fillcolor = getRandomColor(),
+                                fillcolor = getRandomColor(), fillcolor = getRandomColor(),
+                                fillcolor = getRandomColor(), fillcolor = getRandomColor(),
+                                fillcolor = getRandomColor(), fillcolor = getRandomColor(),
+                                fillcolor = getRandomColor(), fillcolor = getRandomColor(),
+                                fillcolor = getRandomColor(), fillcolor = getRandomColor(),
+                                fillcolor = getRandomColor(), fillcolor = getRandomColor(),
+                                fillcolor = getRandomColor(), fillcolor = getRandomColor(),
+                                fillcolor = getRandomColor(), fillcolor = getRandomColor(),
+                                fillcolor = getRandomColor(), fillcolor = getRandomColor(),
+                                fillcolor = getRandomColor(), fillcolor = getRandomColor(),
+                                fillcolor = getRandomColor(), fillcolor = getRandomColor(),
+                                fillcolor = getRandomColor(), fillcolor = getRandomColor(),
+                                fillcolor = getRandomColor(), fillcolor = getRandomColor(),
+                                fillcolor = getRandomColor(), fillcolor = getRandomColor(),
+                                fillcolor = getRandomColor(), fillcolor = getRandomColor(),
+                                fillcolor = getRandomColor(), fillcolor = getRandomColor(),
+                                fillcolor = getRandomColor(), fillcolor = getRandomColor(),
+                                fillcolor = getRandomColor(), fillcolor = getRandomColor(),
+                                fillcolor = getRandomColor(), fillcolor = getRandomColor(),
+                                fillcolor = getRandomColor(), fillcolor = getRandomColor(),
+                                fillcolor = getRandomColor(), fillcolor = getRandomColor(),
+                                fillcolor = getRandomColor(), fillcolor = getRandomColor(),
+                                fillcolor = getRandomColor(), fillcolor = getRandomColor(),
+                                fillcolor = getRandomColor(), fillcolor = getRandomColor(),
+                                fillcolor = getRandomColor(), fillcolor = getRandomColor(),
+                            ],
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        animationSteps: 80,
+                        animationEasing: "easeOutQuart",
+                        //String - Point label font declaration
+                        pointLabelFontFamily: "Arial",
+                        //String - Point label font weight
+                        pointLabelFontStyle: "normal",
+                        //Number - Point label font size in pixels
+                        pointLabelFontSize: 20,
+                        //String - Point label font colour
+                        pointLabelFontColor: "black",
+                        maintainAspectRatio: false,
+                        title: {
+                            text: ti,
+                            display: true
+                        },
+                        scales: {
+                            xAxes: [{
+                                ticks: {
+                                    beginAtZero: true
+                                }
+                            }],
+                            yAxes: [{
+                                ticks: {
+                                    beginAtZero: true
+                                }
+                            }]
+                        }
+                    }
+
+                })
+            } else {
+                var ctx = document.getElementById("grafico")
+                var chartGraph = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: numDigitados,
+                        datasets: [{
+                            label: "Frequencia",
+                            data: vetQ,
+                            border: 6,
+                            backgroundColor: [
+
+                                fillcolor = getRandomColor(), fillcolor = getRandomColor(),
+                                fillcolor = getRandomColor(), fillcolor = getRandomColor(),
+                                fillcolor = getRandomColor(), fillcolor = getRandomColor(),
+                                fillcolor = getRandomColor(), fillcolor = getRandomColor(),
+                                fillcolor = getRandomColor(), fillcolor = getRandomColor(),
+                                fillcolor = getRandomColor(), fillcolor = getRandomColor(),
+                                fillcolor = getRandomColor(), fillcolor = getRandomColor(),
+                                fillcolor = getRandomColor(), fillcolor = getRandomColor(),
+                                fillcolor = getRandomColor(), fillcolor = getRandomColor(),
+                                fillcolor = getRandomColor(), fillcolor = getRandomColor(),
+                                fillcolor = getRandomColor(), fillcolor = getRandomColor(),
+                                fillcolor = getRandomColor(), fillcolor = getRandomColor(),
+                                fillcolor = getRandomColor(), fillcolor = getRandomColor(),
+                                fillcolor = getRandomColor(), fillcolor = getRandomColor(),
+                                fillcolor = getRandomColor(), fillcolor = getRandomColor(),
+                                fillcolor = getRandomColor(), fillcolor = getRandomColor(),
+                                fillcolor = getRandomColor(), fillcolor = getRandomColor(),
+                                fillcolor = getRandomColor(), fillcolor = getRandomColor(),
+                                fillcolor = getRandomColor(), fillcolor = getRandomColor(),
+                                fillcolor = getRandomColor(), fillcolor = getRandomColor(),
+                                fillcolor = getRandomColor(), fillcolor = getRandomColor(),
+                                fillcolor = getRandomColor(), fillcolor = getRandomColor(),
+                                fillcolor = getRandomColor(), fillcolor = getRandomColor(),
+                                fillcolor = getRandomColor(), fillcolor = getRandomColor(),
+                                fillcolor = getRandomColor(), fillcolor = getRandomColor(),
+                                fillcolor = getRandomColor(), fillcolor = getRandomColor(),
+                                fillcolor = getRandomColor(), fillcolor = getRandomColor(),
+                                fillcolor = getRandomColor(), fillcolor = getRandomColor(),
+                                fillcolor = getRandomColor(), fillcolor = getRandomColor(),
+                                fillcolor = getRandomColor(), fillcolor = getRandomColor(),
+                                fillcolor = getRandomColor(), fillcolor = getRandomColor(),
+                                fillcolor = getRandomColor(), fillcolor = getRandomColor(),
+                                fillcolor = getRandomColor(), fillcolor = getRandomColor(),
+                                fillcolor = getRandomColor(), fillcolor = getRandomColor(),
+                                fillcolor = getRandomColor(), fillcolor = getRandomColor(),
+                                fillcolor = getRandomColor(), fillcolor = getRandomColor(),
+                                fillcolor = getRandomColor(), fillcolor = getRandomColor(),
+                                fillcolor = getRandomColor(), fillcolor = getRandomColor(),
+                                fillcolor = getRandomColor(), fillcolor = getRandomColor(),
+                                fillcolor = getRandomColor(), fillcolor = getRandomColor(),
+                                fillcolor = getRandomColor(), fillcolor = getRandomColor(),
+                                fillcolor = getRandomColor(), fillcolor = getRandomColor(),
+                                fillcolor = getRandomColor(), fillcolor = getRandomColor(),
+                                fillcolor = getRandomColor(), fillcolor = getRandomColor(),
+                                fillcolor = getRandomColor(), fillcolor = getRandomColor(),
+                                fillcolor = getRandomColor(), fillcolor = getRandomColor(),
+                                fillcolor = getRandomColor(), fillcolor = getRandomColor(),
+                                fillcolor = getRandomColor(), fillcolor = getRandomColor(),
+                                fillcolor = getRandomColor(), fillcolor = getRandomColor(),
+                                fillcolor = getRandomColor(), fillcolor = getRandomColor(),
+                                fillcolor = getRandomColor(), fillcolor = getRandomColor(),
+                                fillcolor = getRandomColor(), fillcolor = getRandomColor(),
+                                fillcolor = getRandomColor(), fillcolor = getRandomColor(),
+                                fillcolor = getRandomColor(), fillcolor = getRandomColor(),
+                                fillcolor = getRandomColor(), fillcolor = getRandomColor(),
+                                fillcolor = getRandomColor(), fillcolor = getRandomColor(),
+                                fillcolor = getRandomColor(), fillcolor = getRandomColor(),
+                                fillcolor = getRandomColor(), fillcolor = getRandomColor(),
+                                fillcolor = getRandomColor(), fillcolor = getRandomColor(),
+                                fillcolor = getRandomColor(), fillcolor = getRandomColor(),
+                                fillcolor = getRandomColor(), fillcolor = getRandomColor(),
+                                fillcolor = getRandomColor(), fillcolor = getRandomColor(),
+                            ],
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        animationSteps: 80,
+                        animationEasing: "easeOutQuart",
+                        //String - Point label font declaration
+                        pointLabelFontFamily: "Arial",
+                        //String - Point label font weight
+                        pointLabelFontStyle: "normal",
+                        //Number - Point label font size in pixels
+                        pointLabelFontSize: 20,
+                        //String - Point label font colour
+                        pointLabelFontColor: "black",
+                        maintainAspectRatio: false,
+                        title: {
+                            text: ti,
+                            display: true
+                        },
+                        scales: {
+                            xAxes: [{
+                                ticks: {
+                                    beginAtZero: true
+                                }
+                            }],
+                            yAxes: [{
+                                ticks: {
+                                    beginAtZero: true
+                                }
+                            }]
+                        }
+                    }
+                })
+            }
+        };
+
+        function getRandomColor() {
+            var letters = "0123456789ABCDEF".split("");
+            var color = "#";
+            for (var i = 0; i < 6; i++) {
+                color += letters[Math.floor(Math.random() * 16)];
+            }
+            return color;
+        }
+    </script>
+</body>
+
+</html>
