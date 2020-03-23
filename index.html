@@ -40,7 +40,7 @@
                     <div id="divDados" class="col-md-6">
                         <h2 class="textoDados" id='Dados'>Entre com os dados ou faça upload dos arquivos clicando <label
                                 for="input-excel">aqui.</label>
-                            <input href="#" type="file" id="input-excel" placeholder="aqui.">
+                            <input href="#" type="file" id="input-excel" placeholder="aqui." onclick="toggle(true)">
                         </h2>
                         <textarea type="text" id="txtDado"
                             placeholder="Separe os dados com ponto e virgula, por favor."></textarea>
@@ -90,6 +90,12 @@
         </div>
     </div>
     <script>
+        function toggle(enable) {
+            document.getElementById("txtDado").disabled = enable;
+            document.getElementById("txtDado").placeholder =
+                "Caso tenha selecionado seu arquivo, preencha o restante dos campos. Caso não, recarregue a página para reabilitar a área de texto.";
+        }
+
         $('button').on('click', function () {
             $('div#home').hide();
             $('table#idTabela').show();
